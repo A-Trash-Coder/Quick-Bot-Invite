@@ -17,6 +17,7 @@ module.exports = React.memo(
             }}
         >
             <TextInput
+                type={'number'}
                 required={true}
                 onChange={val => bits = val}
             >
