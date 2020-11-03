@@ -15,7 +15,7 @@ module.exports = class QuickBotInvite extends Plugin {
       const clonableGuilds = Object.values(this.getFlattenedGuilds()).filter(guild => this.hasPermission(guild.id, Permissions.MANAGE_GUILD));
       for (const guild of clonableGuilds) {
         guilds.push(React.createElement(menu.MenuItem, {
-          id: `to-guild-${guild.name}`,
+          id: `to-guild-${guild.name}-${guild.id}`,
           label: guild.name,
           action: () => window.open(`https://discord.com/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot&guild_id=${guild.id}`)
         }));
