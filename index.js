@@ -3,6 +3,16 @@ const { getModule, React, constants: { Permissions } } = require('powercord/webp
 const { inject, uninject } = require('powercord/injector');
 const { open: openModal } = require('powercord/modal');
 const Modal = require('./Modal.jsx')
+const popout = require('./Window.js')
+const { sleep } = require('powercord/util');
+
+async function waitForElement(querySelector, win) {
+  let elem;
+  while (!(elem = win.document.querySelector(querySelector))) {
+    await sleep(1);
+  }
+  return elem;
+}
 
 module.exports = class QuickBotInvite extends Plugin {
   async startPlugin() {
@@ -15,9 +25,14 @@ module.exports = class QuickBotInvite extends Plugin {
       const clonableGuilds = Object.values(this.getFlattenedGuilds()).filter(guild => this.hasPermission(guild.id, Permissions.MANAGE_GUILD));
       for (const guild of clonableGuilds) {
         guilds.push(React.createElement(menu.MenuItem, {
-          id: `to-guild-${guild.name}-${guild.id}`,
+          id: `to-guild-${guild.name}`,
           label: guild.name,
-          action: () => window.open(`https://discord.com/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot&guild_id=${guild.id}`)
+          action: async () => {
+            const win = await popout(`${window.location.origin}/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot&disable_guild_select=true&guild_id=${guild.id}`, 'title', 'DISCORD_BOT_POPOUT');
+            (await waitForElement('div.footer-3ZalXG > button.button-38aScr.lookLink-9FtZy-', win)).addEventListener('click', () => {
+              win.close();
+            });
+          }
         }));
       };
 
@@ -29,11 +44,21 @@ module.exports = class QuickBotInvite extends Plugin {
           }, React.createElement(menu.MenuItem, {
             id: "no-perms",
             label: "No Permissions",
-            action: () => window.open(`https://discord.com/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot`)
+            action: async () => {
+              const win = await popout(`${window.location.origin}/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot`, 'title', 'DISCORD_BOT_POPOUT');
+              (await waitForElement('div.footer-3ZalXG > button.button-38aScr.lookLink-9FtZy-', win)).addEventListener('click', () => {
+                win.close();
+              });
+            }
           }), React.createElement(menu.MenuItem, {
             id: "current-guild-perms",
             label: "Current Guild Permissions",
-            action: async () => window.open(`https://discord.com/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot&permissions=${await this.getPermissionsRaw(args[0]['guildId'], args[0]['user']['id'])}`)
+            action: async () => {
+              const win = await popout(`${window.location.origin}/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot&permissions=${await this.getPermissionsRaw(args[0]['guildId'], args[0]['user']['id'])}`, 'title', 'DISCORD_BOT_POPOUT');
+              (await waitForElement('div.footer-3ZalXG > button.button-38aScr.lookLink-9FtZy-', win)).addEventListener('click', () => {
+                win.close();
+              });
+            }
           }), React.createElement(menu.MenuItem, {
             id: "custom-perms",
             label: "Custom Permissions",
