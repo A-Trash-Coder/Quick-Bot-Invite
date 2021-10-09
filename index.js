@@ -64,6 +64,17 @@ module.exports = class QuickBotInvite extends Plugin {
             label: "Custom Permissions",
             action: async () => this.doModal(args)
           }), React.createElement(menu.MenuItem, {
+            id: "copy-url",
+            label: "Copy URL",
+            action: async () => {
+              var textField = document.createElement('textarea');
+              textField.innerText = `${window.location.origin}/oauth2/authorize?client_id=${args[0]['user']['id']}&scope=bot`;
+              document.body.appendChild(textField);
+              textField.select();
+              document.execCommand('copy');
+              textField.remove();
+            }
+          }), React.createElement(menu.MenuItem, {
             id: "to-guild",
             label: "Add To Guild",
           }, guilds)
